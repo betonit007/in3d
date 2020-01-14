@@ -7,6 +7,7 @@ const { check, validationResult } = require('express-validator');
 
 const Profile = require('../../models/Profile');
 const User = require('../../models/User');
+const Posts = require('../../models/Posts')
 
 
 // @route GET for api/profile/me
@@ -15,17 +16,17 @@ router.get('/me', auth, async (req, res) => {
     try {
 
         const profile = await Profile.findOne({ user: req.user.id }).populate('user', ['name', 'avatar']); // populate the returned object with the 'user' fields 'name and 'avatar' 2nd param is an array of the desired fields you want populated.
-
+       
         if (!profile) {
             return res.status(400).json({ msg: 'There is no profile for this user' });
         }
-
+        res.json(profile);
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server Error');
     }
 
-    res.json(profile);
+   
 
 });
 
@@ -33,8 +34,8 @@ router.get('/me', auth, async (req, res) => {
 
 router.post('/', [auth,
     [
-        // check('status', 'Status is required').not().isEmpty(),  // TO DO - IF YOU WANT TO REQUIRE SPECIFIC FIELDS IN USER PROFILE CHANGE THIS
-        // check('skills', 'Skills is required').not().isEmpty()
+        check('status', 'Status is required').not().isEmpty(),  // TO DO - IF YOU WANT TO REQUIRE SPECIFIC FIELDS IN USER PROFILE CHANGE THIS
+        check('skills', 'Skills is required').not().isEmpty()
     ]
 ], async (req, res) => {
 
@@ -44,7 +45,7 @@ router.post('/', [auth,
     }
 
     const { company, website, location, bio, status, githubusername, skills, youtube, facebook, twitter, instagram, linkedin } = req.body;
-
+    
     // Build Profile object
     const profileFields = {};
     profileFields.user = req.user.id;
@@ -55,7 +56,9 @@ router.post('/', [auth,
     if (status) profileFields.status = status;
     if (githubusername) profileFields.githubusername = githubusername;
     if (skills) {
+        
         profileFields.skills = skills.split(',').map(skill => skill.trim()); //split turns into array and trim() removes any amount of spaces for each skill
+        
     }
 
     //Build social object
@@ -129,13 +132,15 @@ router.get('/user/:user_id', async (req, res) => {
 // delete route that deletes user, profile and post
 router.delete('/', auth, async (req, res) => {
     try {
+        
+        await Posts.deleteMany({ user: req.user.id });
         await Profile.findOneAndRemove({ user: req.user.id }); //Remove profile
         await User.findOneAndDelete({ _id: req.user.id }); //Remove User
 
         res.json({ msg: 'User deleted' })
 
     } catch (error) {
-        console.log(error.message)
+        console.error(error.message)
         res.status(500).send('Server Error');
     }
 })
@@ -181,7 +186,6 @@ router.put('/experience',
 router.delete('/experience/:exp_id', auth, async (req, res) => {
     try {
         const profile = await Profile.findOne({ user: req.user.id });
-
         //Get remove index
         const removeIndex = profile.experience.map(item => item.id).indexOf(req.params.exp_id);
 
