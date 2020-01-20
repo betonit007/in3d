@@ -16,7 +16,7 @@ router.get('/me', auth, async (req, res) => {
     try {
 
         const profile = await Profile.findOne({ user: req.user.id }).populate('user', ['name', 'avatar']); // populate the returned object with the 'user' fields 'name and 'avatar' 2nd param is an array of the desired fields you want populated.
-       
+
         if (!profile) {
             return res.status(400).json({ msg: 'There is no profile for this user' });
         }
@@ -26,7 +26,7 @@ router.get('/me', auth, async (req, res) => {
         res.status(500).send('Server Error');
     }
 
-   
+
 
 });
 
@@ -45,7 +45,7 @@ router.post('/', [auth,
     }
 
     const { company, website, location, bio, status, githubusername, skills, youtube, facebook, twitter, instagram, linkedin } = req.body;
-    
+
     // Build Profile object
     const profileFields = {};
     profileFields.user = req.user.id;
@@ -56,9 +56,9 @@ router.post('/', [auth,
     if (status) profileFields.status = status;
     if (githubusername) profileFields.githubusername = githubusername;
     if (skills) {
-        
+
         profileFields.skills = skills.split(',').map(skill => skill.trim()); //split turns into array and trim() removes any amount of spaces for each skill
-        
+
     }
 
     //Build social object
@@ -132,7 +132,7 @@ router.get('/user/:user_id', async (req, res) => {
 // delete route that deletes user, profile and post
 router.delete('/', auth, async (req, res) => {
     try {
-        
+
         await Posts.deleteMany({ user: req.user.id });
         await Profile.findOneAndRemove({ user: req.user.id }); //Remove profile
         await User.findOneAndDelete({ _id: req.user.id }); //Remove User
@@ -222,7 +222,7 @@ router.put('/certifications',
         try {
 
             const profile = await Profile.findOne({ user: req.user.id });
-            console.log(profile);
+
             profile.certifications.unshift(newEdu) // unshift like push but appends to front of array.
 
             await profile.save();
@@ -270,12 +270,12 @@ router.get('/github/:username', (req, res) => {
 
         request(options, (error, response, body) => {
             if (error) console.error(error);
-            
+
             if (response.statusCode !== 200) {
                 return res.status(404).json({ msg: 'No Github profile found' });
             }
             res.json(JSON.parse(body))
-    });
+        });
 
     } catch (error) {
         console.error(error);

@@ -30,6 +30,7 @@ export const loadUser = () => async dispatch => {
 //Login User
 export const login = ( loginInfo ) => async dispatch => {
 
+    dispatch({ type: CLEAR_PROFILE })
 
     try {
   

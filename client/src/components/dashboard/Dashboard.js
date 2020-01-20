@@ -15,7 +15,7 @@ const Dashboard = ({ deleteAccount, getCurrentProfile, auth: { user }, profile: 
     getCurrentProfile();
   }, []);
 
-  return loading && profile && user.name === null ? <Spinner />
+  return (loading === true && profile === null  )  ? <Spinner />
     :
     (
       <>

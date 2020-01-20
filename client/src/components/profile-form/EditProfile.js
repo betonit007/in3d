@@ -24,7 +24,7 @@ const EditProfile = ({ profile: {profile, loading}, createProfile, getCurrentPro
         instagram: loading || !profile.social ? '' : profile.social.instagram
     });
 
-  },[])
+  },[getCurrentProfile])
 
   const [formData, setFormData] = useState({
     company: '',
